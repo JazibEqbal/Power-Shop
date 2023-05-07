@@ -1,1 +1,1 @@
-# BACKEND for Power-Shop
+# BACKEND for SHOP
