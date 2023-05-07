@@ -5,12 +5,11 @@ const StatusCodes = require("http-status");
 
 router.post("/cart/save", async (req, res) => {
   try {
-    let cart = await Cart.findOne({ productId: req.body.productId});
-    if(cart) {
-      cart.quantity += req.body.quantity; 
+    let cart = await Cart.findOne({ productId: req.body.productId });
+    if (cart) {
+      cart.quantity += req.body.quantity;
       await cart.save();
-    }
-    else {
+    } else {
       cart = new Cart(req.body);
       await cart.save();
     }
@@ -29,12 +28,32 @@ router.post("/cart/save", async (req, res) => {
   }
 });
 
-router.get("/cart/save", async (req, res) => {
+router.get("/cart/get", async (req, res) => {
   try {
     const cart = await Cart.find({});
     res.status(StatusCodes.OK).send(cart);
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).send({ message: "Product not found" });
+  }
+});
+
+router.delete("/cart/remove", async (req, res) => {
+  try {
+    let cart = await Cart.findOne({ productId: req.body.productId });
+    if (cart.quantity > 1) {
+      cart.quantity -= 1;
+      await cart.save();
+    } else {
+      cart = await Cart.findOneAndDelete({ productId: req.body.productId });
+    }
+    res.status(StatusCodes.CREATED).send({
+      status: "Product removed",
+      data: {
+        cart,
+      },
+    });
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).send({ message: "Cannot remove" });
   }
 });
 
