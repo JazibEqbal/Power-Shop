@@ -3,19 +3,22 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const app = express();
 dotenv.config();
+
 app.use(express.json());
 app.use(cors());
 
 const connectDB = require("./config/db");
 const productRoutes = require("./routes/productRoutes");
 const cartRoutes = require("./routes/cartRoutes");
+const userRoutes = require('./routes/userRoutes');
 
 connectDB();
 
+app.use(userRoutes);
 app.use(productRoutes);
 app.use(cartRoutes);
 
-const port = process.env.PORT || 5000;
+port = process.env.PORT || 8080;
 
 app.listen(port, console.log(`Server listening on port ${port}`));
 
