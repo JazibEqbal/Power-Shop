@@ -29,6 +29,11 @@ const cartSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    countInStock: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
