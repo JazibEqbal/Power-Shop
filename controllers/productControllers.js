@@ -15,7 +15,6 @@ exports.getAllProducts = async (req, res) => {
 exports.getOneProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-    //console.log('fffffff',product);
     if (product) res.status(StatusCodes.OK).send(product);
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).send({ message: "Product not found" });

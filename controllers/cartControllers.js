@@ -3,12 +3,16 @@ const StatusCodes = require("http-status");
 
 exports.saveTocart = async (req, res) => {
   try {
-    let cart = await Cart.findOne({ productId: req.body.productId });
+    console.log('first',req.body);
+    let cart = await Cart.findOne({
+      productId: req.body.productId,
+      user: req.user._id,
+    });
     if (cart) {
       cart.quantity += req.body.quantity;
       await cart.save();
     } else {
-      cart = new Cart({...req.body, user: req.user._id});
+      cart = new Cart({ ...req.body, user: req.user._id });
       await cart.save();
     }
     res.status(StatusCodes.CREATED).send({
@@ -19,6 +23,24 @@ exports.saveTocart = async (req, res) => {
     });
   } catch (err) {
     res.status(StatusCodes.BAD_REQUEST).send({ message: "Not added to cart" });
+  }
+};
+
+exports.saveOrderDetails = async (req, res) => {
+  try {
+    console.log(req.body);
+    const order = await Cart.updateMany({
+      user: req.user._id,
+      isOrdered: false
+    },{...req.body, isOrdered: true});
+    res.status(StatusCodes.CREATED).send({
+      order,
+      message: "Order Success!",
+    });
+  } catch (error) {
+    res
+      .status(StatusCodes.BAD_REQUEST)
+      .send({ message: "Some error occured!" });
   }
 };
 
