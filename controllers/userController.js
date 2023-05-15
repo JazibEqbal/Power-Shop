@@ -1,6 +1,7 @@
 const Product = require("../models/productModel");
 const User = require("../models/userModel");
 const StatusCodes = require("http-status");
+const Cart = require("../models/cartModel");
 
 exports.registerUser = async (req, res) => {
   const user = new User(req.body);
@@ -35,14 +36,6 @@ exports.logInuser = async (req, res) => {
       .send({ message: "Invalid Credentials!" });
   }
 };
-exports.getUser = async () => {
-  try {
-    const user = await Product.findById({ _id: req.user._id });
-    res.status(StatusCodes.FOUND).send(user);
-  } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST).send({ message: "User not found" });
-  }
-};
 
 exports.getAdmin = async (req, res) => {
   try {
@@ -50,7 +43,7 @@ exports.getAdmin = async (req, res) => {
     if (admin) {
       res.status(StatusCodes.OK).send(true);
     } else {
-      res.status(StatusCodes.NOT_FOUND).send("Not a admin");
+      res.status(StatusCodes.BAD_REQUEST).send("Not a admin");
     }
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).send({ message: "No Admin Found" });
@@ -64,5 +57,23 @@ exports.createProductAdmin = async (req, res) => {
     res.status(StatusCodes.CREATED).send(product);
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).send({ message: "Cannot Post" });
+  }
+};
+
+exports.getAllUserAdmin = async (req, res) => {
+  try {
+    const user = await User.find({ isAdmin: false });
+    res.status(StatusCodes.OK).send(user);
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).send({ message: "No users" });
+  }
+};
+
+exports.getAllOrdersForAUser = async (req, res) => {
+  try {
+    const orders = await Cart.find({ user: req.params.id });
+    res.status(StatusCodes.OK).send(orders);
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).send({ message: "No orders" });
   }
 };
