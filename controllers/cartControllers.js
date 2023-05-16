@@ -3,10 +3,10 @@ const StatusCodes = require("http-status");
 
 exports.saveTocart = async (req, res) => {
   try {
-    console.log('first',req.body);
     let cart = await Cart.findOne({
       productId: req.body.productId,
       user: req.user._id,
+      isOrdered: false,
     });
     if (cart) {
       cart.quantity += req.body.quantity;
@@ -26,24 +26,6 @@ exports.saveTocart = async (req, res) => {
   }
 };
 
-exports.saveOrderDetails = async (req, res) => {
-  try {
-    console.log(req.body);
-    const order = await Cart.updateMany({
-      user: req.user._id,
-      isOrdered: false
-    },{...req.body, isOrdered: true});
-    res.status(StatusCodes.CREATED).send({
-      order,
-      message: "Order Success!",
-    });
-  } catch (error) {
-    res
-      .status(StatusCodes.BAD_REQUEST)
-      .send({ message: "Some error occured!" });
-  }
-};
-
 exports.getCart = async (req, res) => {
   try {
     const cart = await Cart.find({ user: req.user._id });
@@ -55,7 +37,7 @@ exports.getCart = async (req, res) => {
 
 exports.removeFromCart = async (req, res) => {
   try {
-    let cart = await Cart.findOne({ productId: req.body.productId });
+    let cart = await Cart.findById(req.body.productId);
     if (cart.quantity > 1) {
       cart.quantity -= 1;
       await cart.save();
@@ -75,7 +57,8 @@ exports.removeFromCart = async (req, res) => {
 
 exports.addOneToCart = async (req, res) => {
   try {
-    let cart = await Cart.findOne({ productId: req.body.productId });
+    let cart = await Cart.findById(req.body.productId);
+    //console.log(req.body.productId)
     if (cart.quantity < cart.countInStock) {
       cart.quantity++;
       await cart.save();
@@ -95,6 +78,36 @@ exports.addOneToCart = async (req, res) => {
       });
     }
   } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST).send({ message: "Cannot add" });
+    res.status(StatusCodes.BAD_REQUEST).send({ message: "Can not add" });
+  }
+};
+
+exports.saveOrderDetails = async (req, res) => {
+  try {
+    //console.log(req.body);
+    const order = await Cart.updateMany(
+      {
+        user: req.user._id,
+        isOrdered: false,
+      },
+      { ...req.body, isOrdered: true }
+    );
+    res.status(StatusCodes.CREATED).send({
+      order,
+      message: "Order Success!",
+    });
+  } catch (error) {
+    res
+      .status(StatusCodes.BAD_REQUEST)
+      .send({ message: "Some error occured!" });
+  }
+};
+
+exports.getAllOrders = async (req, res) => {
+  try {
+    const orders = await Cart.find({ user: req.user._id, isOrdered: true});
+    res.status(StatusCodes.OK).send(orders);
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).send({ message: "No orders" });
   }
 };
